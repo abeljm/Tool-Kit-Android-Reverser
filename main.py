@@ -1,6 +1,8 @@
 #-*- coding: utf-8 -*-
 import sys
-import os 
+import os
+import os.path
+from functools import partial
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QLineEdit
 from PyQt5 import uic 
 
@@ -20,14 +22,14 @@ class Ventana(QMainWindow):
 		self.edit3 = Edit('', self)
 		self.edit3.setGeometry(84, 342, 271, 21)
 		self.edit3.setPlaceholderText("Arrastra el archivo aqui :)")		
-		self.BAbrir.clicked.connect(self.archivo)
+		self.BAbrir.clicked.connect(partial(self.archivo,self.edit,'apk','dex'))
 		self.BBorrar.clicked.connect(self.edit.clear)
 		self.BDescompilar.clicked.connect(self.descompilar)
 		self.BCompilar.clicked.connect(self.compilar)
 
-		self.BAbrir_2.clicked.connect(self.archivo2)		
+		self.BAbrir_2.clicked.connect(partial(self.archivo,self.edit2,'apk','dex'))		
 		self.BBorrar_2.clicked.connect(self.edit2.clear)
-		self.BAbrir_3.clicked.connect(self.archivo3)
+		self.BAbrir_3.clicked.connect(partial(self.archivo,self.edit3,'apk','dex'))
 		self.BDex2jar.clicked.connect(self.dex2jar)
 		self.BJar2dex.clicked.connect(self.jar2dex)
 
@@ -39,42 +41,38 @@ class Ventana(QMainWindow):
 	  if resultado == QMessageBox.Yes: event.accept()
 	  else: event.ignore()
 
-    # funcion que abrira el apk
-	def archivo(self):
-		# abrimos el archivo y ponemos como filtro que sea solo con extension apk 
-	    fileName = QFileDialog.getOpenFileName(self, 'Selecciona el archivo', '','Archivos APK(*.apk)')	    
-	    self.edit.setText(fileName[0])
+    
+	def archivo(self,b_edit,*args):
+		ext_file = []
+		for arg in args[:-1]:
+			ext = f'*.{arg} '
+			ext_file.append(ext)
+		files = ''.join(ext_file)
+		msj_file = 'Archivos({})'.format(files)
+		fileName = QFileDialog.getOpenFileName(self, 'Selecciona el archivo', '',msj_file)
+		b_edit.setText(fileName[0])
 
-	# funcion que abrira el apk
-	def archivo2(self):
-		# abrimos el archivo y ponemos como filtro que sea solo con extension apk 
-	    fileName = QFileDialog.getOpenFileName(self, 'Selecciona el archivo', '','Archivos(*.apk *.dex)')	    
-	    self.edit2.setText(fileName[0])
-	# funcion que abrira el apk
-
-	def archivo3(self):
-		# abrimos el archivo y ponemos como filtro que sea solo con extension apk 
-	    fileName = QFileDialog.getOpenFileName(self, 'Selecciona el archivo', '','Archivos (*.apk)')	    
-	    self.edit3.setText(fileName[0])
 
 	def descompilar(self):
-	    global archivo
-	    global carp_desc
-	    global apktool
-	    archivo = self.edit.text()
-	    carp_desc = archivo.replace('.apk','')
-	    apktool = 'herramientas\\apktool\\apktool.jar'
-	    os.system('java -jar ' + apktool + ' d ' + archivo + ' -o ' + carp_desc)
-	    QMessageBox.information(self, 'Informacion', 'Genial, Archivo descompilado', QMessageBox.Ok)
+		ruta_archivo = self.edit.text()
+		carp_desc = ruta_archivo.replace('.apk','') #ruta archivo sin extension
+		apktool = 'herramientas\\apktool\\apktool.jar'
+		os.system('java -jar ' + apktool + ' d ' + ruta_archivo + ' -o ' + carp_desc)
+		QMessageBox.information(self, 'Informacion', 'Genial, Archivo descompilado', QMessageBox.Ok)
 
-	def compilar(self):		
-		nombre_archivo = os.path.basename(archivo) # extrae el nombre de la ruta del archivo archivo.apk	
-		new_nombre_archivo = 'new_' + nombre_archivo # concatena la string new dando como resultado new_archivo.apk
-		new_archivo = archivo.replace(nombre_archivo, new_nombre_archivo) 		
-		#print('java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + new_archivo)
-		os.system('java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + new_archivo)
-		#print('termino....')
-		QMessageBox.information(self, 'Informacion', 'Genial, Archivo Compilado', QMessageBox.Ok)
+	def compilar(self):
+		apktool = 'herramientas\\apktool\\apktool.jar'
+		ruta_archivo = self.edit.text() #ruta archivo.apk
+		carp_desc = ruta_archivo.replace('.apk','') #ruta carpeta archivo
+		if os.path.isdir(carp_desc):# verificamos si la carpeta existe
+			nombre_archivo = os.path.basename(self.edit.text()) # extrae el nombre de la ruta del archivo = archivo.apk
+			new_nombre_archivo = 'new_' + nombre_archivo # concatena la string new dando como resultado new_archivo.apk
+			ruta_archivo2 = ruta_archivo.replace(nombre_archivo, new_nombre_archivo)
+			#print('java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + new_archivo)
+			os.system('java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + ruta_archivo2)
+		else:
+			QMessageBox.information(self, 'Informacion', 'No se encuentra la carpeta', QMessageBox.Ok)
+
 
 	def dex2jar(self):
 		
@@ -87,13 +85,9 @@ class Ventana(QMainWindow):
 				new_archivo = archivo2.replace('.dex', '.jar')
 			else:
 				new_archivo = archivo2.replace('.apk', '.jar')
-
-
-			os.system(dex2jar + ' ' + archivo2 + ' -o ' + new_archivo)
-						
+			os.system(dex2jar + ' ' + archivo2 + ' -o ' + new_archivo)						
 		else:
-			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .apk o .dex', QMessageBox.Ok)
-			
+			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .apk o .dex', QMessageBox.Ok)			
 		
 
 	def jar2dex(self):
