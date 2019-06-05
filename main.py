@@ -1,10 +1,9 @@
 #-*- coding: utf-8 -*-
 import sys
 import os
-import os.path
 from functools import partial
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QLineEdit
-from PyQt5 import uic 
+from PyQt5 import uic
 
 # Clase heredada de QMainWindow (constructor de ventanas)
 class Ventana(QMainWindow):
@@ -21,19 +20,21 @@ class Ventana(QMainWindow):
 		self.edit2.setPlaceholderText("Arrastra el archivo aqui :)")
 		self.edit3 = Edit('', self)
 		self.edit3.setGeometry(84, 342, 271, 21)
-		self.edit3.setPlaceholderText("Arrastra el archivo aqui :)")		
-		self.BAbrir.clicked.connect(partial(self.archivo,self.edit,'apk','dex'))
+		self.edit3.setPlaceholderText("Arrastra el archivo aqui :)")
+
+		self.BAbrir.clicked.connect(partial(self.archivo,self.edit,'apk'))
 		self.BBorrar.clicked.connect(self.edit.clear)
 		self.BDescompilar.clicked.connect(self.descompilar)
 		self.BCompilar.clicked.connect(self.compilar)
 
 		self.BAbrir_2.clicked.connect(partial(self.archivo,self.edit2,'apk','dex'))		
-		self.BBorrar_2.clicked.connect(self.edit2.clear)
-		self.BAbrir_3.clicked.connect(partial(self.archivo,self.edit3,'apk','dex'))
+		self.BBorrar_2.clicked.connect(self.edit2.clear)		
 		self.BDex2jar.clicked.connect(self.dex2jar)
 		self.BJar2dex.clicked.connect(self.jar2dex)
 
+		self.BAbrir_3.clicked.connect(partial(self.archivo,self.edit3,'apk'))
 		self.BBorrar_3.clicked.connect(self.edit3.clear)
+		self.BFirmar.clicked.connect(self.firmar)
 
     # Evento para cerrar la aplicacion
 	def closeEvent(self, event):
@@ -70,6 +71,7 @@ class Ventana(QMainWindow):
 			ruta_archivo2 = ruta_archivo.replace(nombre_archivo, new_nombre_archivo)
 			#print('java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + new_archivo)
 			os.system('java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + ruta_archivo2)
+			QMessageBox.information(self, 'Informacion', 'Genial, Archivo descompilado', QMessageBox.Ok)
 		else:
 			QMessageBox.information(self, 'Informacion', 'No se encuentra la carpeta', QMessageBox.Ok)
 
@@ -100,7 +102,22 @@ class Ventana(QMainWindow):
 						
 		else:
 			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .dex', QMessageBox.Ok)
-			# herramientas\\d2j-dex2jar\\d2j-dex2jar.bat ruta/archivo.dex -o ruta/archivo.jar		
+			
+
+	def firmar(self):
+		uberapksigner = 'herramientas\\uber-apk-signer\\uber-apk-signer.jar'
+		archivo3 = self.edit3.text()
+		exists_file = os.path.isfile(archivo3) # si existe el archivo is true
+		extension = os.path.splitext(archivo3)[1]
+		if exists_file and extension == '.apk':
+			carp_desc = archivo3.replace('.apk','') #ruta carpeta archivo
+			os.system('java -jar ' + uberapksigner + ' -a ' + archivo3 + ' -o ' + carp_desc)
+			QMessageBox.information(self, 'Informacion', 'Genial, Archivo Firmado', QMessageBox.Ok)
+		else:
+			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .dex', QMessageBox.Ok)
+
+		# java -jar uber-apk-signer.jar -a /path/to/apks --out /path/to/apks/out
+	    	
 
 
 class Edit(QLineEdit):
