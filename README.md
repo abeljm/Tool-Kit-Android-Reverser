@@ -24,6 +24,8 @@ _Para correr la tool solo ejecuta en consola en el directorio del proyecto_
 python main.py
 ```
 
+_si gustas podrias convertir main.py en exe pero todo depende de gustos._ 
+
 ### Ejecutando Took Kit Android Reverser ⚙️
 
 #### Descompilar APK
