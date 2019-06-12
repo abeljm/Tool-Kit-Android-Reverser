@@ -5,7 +5,7 @@ libre por lo tanto se puede actualizar las herramientas las veces que se necesit
 
 ### Pre-requisitos 📋
 
-_Para correr la herramienta necesitas instalar Python 3.7.3 y PyQT5_
+_Para correr la herramienta necesitas instalar Java, Python 3.7.3 y PyQT5_
 
 ```
 pip3 install PyQt5
