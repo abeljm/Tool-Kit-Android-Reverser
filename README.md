@@ -30,7 +30,7 @@ _si gustas podrias convertir main.py en exe pero todo depende de gustos._
 
 #### Descompilar APK
 
-_Al ejecutar la tool podemos descompilar el archivo apk arrastrandolo al edit desde cualquier directorio_
+_Al ejecutar la tool podemos descompilar el archivo apk arrastrandolo al edit desde cualquier directorio y presionando el boton descompilar_
 
 ![Optional Text](https://github.com/abeljm/Tool-Kit-Android-Reverser/blob/master/imagenes/modulo1_a.jpg)
 
@@ -45,7 +45,7 @@ _Para compilar el APK solo nesecitamos presionar el boton compilar , el programa
 
 ![Optional Text](https://github.com/abeljm/Tool-Kit-Android-Reverser/blob/master/imagenes/modulo1_c.jpg)
 
-_Con esto solo faltaria firma el nuevo archivo APK, pero esto se explica mas adelante._
+_Con esto solo faltaria firmar el nuevo archivo APK, pero esto se explica mas adelante._
 
 
 
