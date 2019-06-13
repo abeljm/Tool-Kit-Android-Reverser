@@ -83,8 +83,11 @@ class Ventana(QMainWindow):
 
 
 	def dex2jar(self):
+		if sys.platform == 'win32':
+			dex2jar = 'herramientas\\d2j-dex2jar\\d2j-jar2dex.bat'
+		else:
+			dex2jar = 'herramientas\\d2j-dex2jar\\d2j-dex2jar.sh'		
 		
-		dex2jar = 'herramientas\\d2j-dex2jar\\d2j-dex2jar.bat'
 		archivo2 = self.edit2.text()
 		extension = os.path.splitext(archivo2)[1]
 		if extension == '.dex' or extension == '.apk':
@@ -100,7 +103,11 @@ class Ventana(QMainWindow):
 		
 
 	def jar2dex(self):
-		jar2dex = 'herramientas\\d2j-dex2jar\\d2j-jar2dex.bat'
+		if sys.platform == 'win32':
+			jar2dex = 'herramientas\\d2j-dex2jar\\d2j-jar2dex.bat'
+		else:
+			jar2dex = 'herramientas\\d2j-dex2jar\\d2j-jar2dex.sh'
+		
 		archivo2 = self.edit2.text()
 		extension = os.path.splitext(archivo2)[1]
 		if extension == '.jar':
