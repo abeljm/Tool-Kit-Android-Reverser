@@ -56,10 +56,16 @@ class Ventana(QMainWindow):
 
 	def descompilar(self):
 		ruta_archivo = self.edit.text()
-		carp_desc = ruta_archivo.replace('.apk','') #ruta archivo sin extension
 		apktool = 'herramientas\\apktool\\apktool.jar'
-		os.system('java -jar ' + apktool + ' d ' + ruta_archivo + ' -o ' + carp_desc)
-		QMessageBox.information(self, 'Informacion', 'Genial, Archivo descompilado', QMessageBox.Ok)
+		exists_file = os.path.isfile(ruta_archivo) # si existe el archivo is true
+		extension = os.path.splitext(ruta_archivo)[1]
+		if exists_file and extension == '.apk':
+			carp_desc = ruta_archivo.replace('.apk','') #ruta archivo sin extension
+			# java -jar uber-apk-signer.jar -a /path/to/apks --out /path/to/apks/out
+			os.system('java -jar ' + apktool + ' d ' + ruta_archivo + ' -o ' + carp_desc)
+			QMessageBox.information(self, 'Informacion', 'Genial, Archivo descompilado', QMessageBox.Ok)
+		else:
+			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .apk', QMessageBox.Ok)
 
 	def compilar(self):
 		apktool = 'herramientas\\apktool\\apktool.jar'
@@ -71,7 +77,7 @@ class Ventana(QMainWindow):
 			ruta_archivo2 = ruta_archivo.replace(nombre_archivo, new_nombre_archivo)
 			#print('java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + new_archivo)
 			os.system('java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + ruta_archivo2)
-			QMessageBox.information(self, 'Informacion', 'Genial, Archivo descompilado', QMessageBox.Ok)
+			QMessageBox.information(self, 'Informacion', 'Genial, Archivo compilado', QMessageBox.Ok)
 		else:
 			QMessageBox.information(self, 'Informacion', 'No se encuentra la carpeta', QMessageBox.Ok)
 
@@ -87,7 +93,8 @@ class Ventana(QMainWindow):
 				new_archivo = archivo2.replace('.dex', '.jar')
 			else:
 				new_archivo = archivo2.replace('.apk', '.jar')
-			os.system(dex2jar + ' ' + archivo2 + ' -o ' + new_archivo)						
+			os.system(dex2jar + ' ' + archivo2 + ' -o ' + new_archivo)
+			QMessageBox.information(self, 'Informacion', 'Genial, Archivo jar creado', QMessageBox.Ok)						
 		else:
 			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .apk o .dex', QMessageBox.Ok)			
 		
@@ -99,7 +106,7 @@ class Ventana(QMainWindow):
 		if extension == '.jar':
 			new_archivo = archivo2.replace('.jar', '.dex')
 			os.system(jar2dex + ' ' + archivo2 + ' -o ' + new_archivo)
-						
+			QMessageBox.information(self, 'Informacion', 'Genial, Archivo dex creado', QMessageBox.Ok)						
 		else:
 			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .dex', QMessageBox.Ok)
 			
