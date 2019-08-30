@@ -3,15 +3,26 @@ import sys
 import os
 from functools import partial
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QLineEdit
+from PyQt5 import QtCore
 from PyQt5 import uic
 
 # Clase heredada de QMainWindow (constructor de ventanas)
 class Ventana(QMainWindow):
 	# Metodo constructor de la clase
+	errorSignal = QtCore.pyqtSignal(str)
+	outputSignal = QtCore.pyqtSignal(str)
 	def __init__(self):
 		QMainWindow.__init__(self)
 		# Cargar la configuracion del archivo .ui en el objeto
 		uic.loadUi("MenuToolAndroid.ui", self)
+
+		self.process = QtCore.QProcess()
+		self.process.readyReadStandardError.connect(self.onReadyReadStandardError)
+		self.process.readyReadStandardOutput.connect(self.onReadyReadStandardOutput)
+		self.process.finished.connect(lambda: QMessageBox.information(self, 'Informacion', 'listo, trabajo hecho', QMessageBox.Ok))
+		
+
+
 		self.edit = Edit('', self)
 		self.edit.setGeometry(84, 82, 271, 21)
 		self.edit.setPlaceholderText("Arrastra el archivo aqui :)")
@@ -35,6 +46,22 @@ class Ventana(QMainWindow):
 		self.BAbrir_3.clicked.connect(partial(self.archivo,self.edit3,'apk'))
 		self.BBorrar_3.clicked.connect(self.edit3.clear)
 		self.BFirmar.clicked.connect(self.firmar)
+
+	# Funciones captura output de cmd
+
+	def onReadyReadStandardError(self):
+		error = self.process.readAllStandardError().data().decode()
+		self.editor.appendPlainText(error)
+		self.errorSignal.emit(error)
+
+	def onReadyReadStandardOutput(self):
+		result = bytearray(self.process.readAllStandardOutput()) #.data().decode()
+		
+		self.editor.appendPlainText(result.decode("ascii"))
+		
+		self.outputSignal.emit(result.decode("ascii"))
+
+				
 
     # Evento para cerrar la aplicacion
 	def closeEvent(self, event):
@@ -62,8 +89,12 @@ class Ventana(QMainWindow):
 		if exists_file and extension == '.apk':
 			carp_desc = ruta_archivo.replace('.apk','') #ruta archivo sin extension
 			# java -jar uber-apk-signer.jar -a /path/to/apks --out /path/to/apks/out
-			os.system('java -jar ' + apktool + ' d ' + ruta_archivo + ' -o ' + carp_desc)
-			QMessageBox.information(self, 'Informacion', 'Genial, Archivo descompilado', QMessageBox.Ok)
+			#os.system('java -jar ' + apktool + ' d ' + ruta_archivo + ' -o ' + carp_desc)
+
+			cmd = 'java -jar ' + apktool + ' d ' + ruta_archivo + ' -o ' + carp_desc
+			self.process.start(cmd)
+
+
 		else:
 			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .apk', QMessageBox.Ok)
 
@@ -74,10 +105,12 @@ class Ventana(QMainWindow):
 		if os.path.isdir(carp_desc):# verificamos si la carpeta existe
 			nombre_archivo = os.path.basename(self.edit.text()) # extrae el nombre de la ruta del archivo = archivo.apk
 			new_nombre_archivo = 'new_' + nombre_archivo # concatena la string new dando como resultado new_archivo.apk
-			ruta_archivo2 = ruta_archivo.replace(nombre_archivo, new_nombre_archivo)
-			#print('java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + new_archivo)
-			os.system('java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + ruta_archivo2)
-			QMessageBox.information(self, 'Informacion', 'Genial, Archivo compilado', QMessageBox.Ok)
+			ruta_archivo2 = ruta_archivo.replace(nombre_archivo, new_nombre_archivo)			
+			
+
+			cmd = 'java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + ruta_archivo2
+			self.process.start(cmd)
+
 		else:
 			QMessageBox.information(self, 'Informacion', 'No se encuentra la carpeta', QMessageBox.Ok)
 
@@ -95,9 +128,11 @@ class Ventana(QMainWindow):
 			if extension == '.dex':
 				new_archivo = archivo2.replace('.dex', '.jar')
 			else:
-				new_archivo = archivo2.replace('.apk', '.jar')
-			os.system(dex2jar + ' ' + archivo2 + ' -o ' + new_archivo)
-			QMessageBox.information(self, 'Informacion', 'Genial, Archivo jar creado', QMessageBox.Ok)						
+				new_archivo = archivo2.replace('.apk', '.jar')			
+
+			cmd = dex2jar + ' ' + archivo2 + ' -o ' + new_archivo
+			self.process.start(cmd)
+
 		else:
 			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .apk o .dex', QMessageBox.Ok)			
 		
@@ -111,9 +146,11 @@ class Ventana(QMainWindow):
 		archivo2 = self.edit2.text()
 		extension = os.path.splitext(archivo2)[1]
 		if extension == '.jar':
-			new_archivo = archivo2.replace('.jar', '.dex')
-			os.system(jar2dex + ' ' + archivo2 + ' -o ' + new_archivo)
-			QMessageBox.information(self, 'Informacion', 'Genial, Archivo dex creado', QMessageBox.Ok)						
+			new_archivo = archivo2.replace('.jar', '.dex')			
+
+			cmd = jar2dex + ' ' + archivo2 + ' -o ' + new_archivo
+			self.process.start(cmd)
+
 		else:
 			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .dex', QMessageBox.Ok)
 			
@@ -125,10 +162,12 @@ class Ventana(QMainWindow):
 		extension = os.path.splitext(archivo3)[1]
 		if exists_file and extension == '.apk':
 			carp_desc = archivo3.replace('.apk','') #ruta carpeta archivo
-			os.system('java -jar ' + uberapksigner + ' -a ' + archivo3 + ' -o ' + carp_desc)
-			QMessageBox.information(self, 'Informacion', 'Genial, Archivo Firmado', QMessageBox.Ok)
+			
+			cmd = 'java -jar ' + uberapksigner + ' -a ' + archivo3 + ' -o ' + carp_desc
+			self.process.start(cmd)
+
 		else:
-			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .dex', QMessageBox.Ok)
+			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension apk', QMessageBox.Ok)
 
 		# java -jar uber-apk-signer.jar -a /path/to/apks --out /path/to/apks/out
 	    	
@@ -152,6 +191,7 @@ class Edit(QLineEdit):
 				self.setText(path)
 		else:
 			e.ignore()
+
 
 
 
