@@ -47,8 +47,6 @@ class Ventana(QMainWindow):
 		self.BBorrar_3.clicked.connect(self.edit3.clear)
 		self.BFirmar.clicked.connect(self.firmar)
 
-	# Funciones captura output de cmd
-
 	def onReadyReadStandardError(self):
 		error = self.process.readAllStandardError().data().decode()
 		self.editor.appendPlainText(error)
@@ -61,7 +59,19 @@ class Ventana(QMainWindow):
 		
 		self.outputSignal.emit(result.decode("ascii"))
 
-				
+		
+        
+       
+		"""mensaje = 'I: Copying original files...\r\n'       
+		if result.decode("ascii") == mensaje:
+			QMessageBox.information(self, 'Informacion', 'Genial, Archivo descompilado', QMessageBox.Ok)
+		mensaje_comp = 'I: Built apk...\r\n'
+		if result.decode("ascii") == mensaje_comp:
+			QMessageBox.information(self, 'Informacion', 'Genial, Archivo Compilado', QMessageBox.Ok)  """
+
+
+
+		
 
     # Evento para cerrar la aplicacion
 	def closeEvent(self, event):
@@ -95,6 +105,8 @@ class Ventana(QMainWindow):
 			self.process.start(cmd)
 
 
+
+			#QMessageBox.information(self, 'Informacion', 'Genial, Archivo descompilado', QMessageBox.Ok)
 		else:
 			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .apk', QMessageBox.Ok)
 
@@ -111,6 +123,8 @@ class Ventana(QMainWindow):
 			cmd = 'java -jar ' + apktool + ' b ' + carp_desc + ' -o ' + ruta_archivo2
 			self.process.start(cmd)
 
+
+			#QMessageBox.information(self, 'Informacion', 'Genial, Archivo compilado', QMessageBox.Ok)
 		else:
 			QMessageBox.information(self, 'Informacion', 'No se encuentra la carpeta', QMessageBox.Ok)
 
@@ -128,11 +142,13 @@ class Ventana(QMainWindow):
 			if extension == '.dex':
 				new_archivo = archivo2.replace('.dex', '.jar')
 			else:
-				new_archivo = archivo2.replace('.apk', '.jar')			
+				new_archivo = archivo2.replace('.apk', '.jar')
+			#os.system(dex2jar + ' ' + archivo2 + ' -o ' + new_archivo)
 
 			cmd = dex2jar + ' ' + archivo2 + ' -o ' + new_archivo
 			self.process.start(cmd)
 
+			#QMessageBox.information(self, 'Informacion', 'Genial, Archivo jar creado', QMessageBox.Ok)						
 		else:
 			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .apk o .dex', QMessageBox.Ok)			
 		
@@ -151,6 +167,7 @@ class Ventana(QMainWindow):
 			cmd = jar2dex + ' ' + archivo2 + ' -o ' + new_archivo
 			self.process.start(cmd)
 
+			#QMessageBox.information(self, 'Informacion', 'Genial, Archivo dex creado', QMessageBox.Ok)						
 		else:
 			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension .dex', QMessageBox.Ok)
 			
@@ -166,6 +183,7 @@ class Ventana(QMainWindow):
 			cmd = 'java -jar ' + uberapksigner + ' -a ' + archivo3 + ' -o ' + carp_desc
 			self.process.start(cmd)
 
+			#QMessageBox.information(self, 'Informacion', 'Genial, Archivo Firmado', QMessageBox.Ok)
 		else:
 			QMessageBox.information(self, 'Error', 'Solo se admite archivos con extension apk', QMessageBox.Ok)
 
